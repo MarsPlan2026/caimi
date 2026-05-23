@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>失控的输入框 - 多机制复合破坏版</title>
+    <title>失控的输入框 - 真实大案法庭审判版</title>
     <style>
         * { box-sizing: border-box; background-color: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace; }
         body { margin: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
         #game-container { width: 80%; max-width: 600px; text-align: center; position: relative; }
-        #hint { font-size: 1.5rem; margin-bottom: 40px; line-height: 1.6; letter-spacing: 2px; }
+        #hint { font-size: 1.1rem; margin-bottom: 40px; line-height: 1.6; letter-spacing: 1px; text-align: left; border: 2px solid #000; padding: 20px; }
         #input-area { position: relative; height: 100px; }
         input[type="text"] { border: 2px solid #000000; padding: 10px 15px; font-size: 1.2rem; width: 250px; outline: none; text-align: center; transition: all 0.2s; }
         button { border: 2px solid #000000; padding: 10px 25px; font-size: 1.2rem; cursor: pointer; margin-left: 10px; background: #fff; }
@@ -30,122 +30,88 @@
     <div id="dev-door" title="作者后门"></div>
 
     <script>
+        // 核心机制注册表（用于动态执行关卡折磨逻辑）
+        const mechanicsRegistry = {
+            "shrink": {
+                init: function(inputEl) {
+                    inputEl._shrinkW = 250;
+                    inputEl._shrinkHandler = () => {
+                        inputEl._shrinkW = Math.max(50, inputEl._shrinkW - 40);
+                        inputEl.style.width = inputEl._shrinkW + 'px';
+                    };
+                    window.addEventListener('shrink-fail', inputEl._shrinkHandler);
+                },
+                clear: function(inputEl) {
+                    if (inputEl._shrinkHandler) {
+                        window.removeEventListener('shrink-fail', inputEl._shrinkHandler);
+                        delete inputEl._shrinkHandler;
+                    }
+                    inputEl.style.width = '250px';
+                }
+            }
+        };
+
+        // 关卡数据（明文答案已全部转换为 answerToken 安全Base64格式）
         const levels = [
             {
-                id: 1,
-                hint: "游戏开始了。真正的线索往往隐藏在看不见的地方，比如这个括号里：{ANSWER}。你应该知道要输入什么了吧？ {SECRET}",
-                answerToken: "QU5TV0VS",
-                init: function() {
-                    let rawText = hintEl.textContent; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (m,p1)=>`<span style="color:#fff;background:transparent">${p1}</span>`); hintEl.innerHTML = processedHtml;
-                },
-                clear: function() {
-                    hintEl.innerHTML = hintEl.textContent.replace(/[{}]/g, '');
-                }
+                "id": 1,
+                "hint": "【第一庭：ATM机的狂欢】被告人来到某银行的自动柜员机（ATM）取款。当他输入取款1000元后，ATM机因系统升级漏洞，突然吐出了1000元现金，但被告人的银行卡账户却只被扣除了1元。被告人见状狂喜，意识到机器坏了，于是连续疯狂操作了170次，合计取走现金17.5万元后潜逃。公诉机关指控其犯有“盗窃罪”。但辩护律师坚称：钱是机器自己吐出来的，被告人没有实施‘秘密窃取’的行为，不构成盗窃。作为大法官，请你敲下法槌，被告人的行为在刑法上最终定性为什么罪？",
+                "answerToken": "6ZKX56qu572q", // 盗窃罪
+                "mechanics": ["shrink"]
             },
             {
-                id: 2,
-                hint: "【请听题】什么英文字母是大多数人天天都在看，但在这里你却偏偏看不见的？",
-                answerToken: "d2hpdGU=",
-                init: function() {
-                    inputEl.style.color = '#ffffff'; inputEl.style.caretColor = '#000000';
-                },
-                clear: function() {
-                    inputEl.style.color = '#000000';
-                }
+                "id": 2,
+                "hint": "【第二庭：消失的第二枪】被告人因深仇大恨，深夜潜入仇人家中，掏出私藏的自制手枪对准仇人的胸口开了一枪，仇人应声倒地，痛苦地在地上翻滚。被告人本想再开第二枪补刀将其彻底杀害，但就在他拉动套筒时，突然听到窗外传来警笛声（其实是刚好路过的救护车）。被告人极度恐惧，误以为警察来了，于是丢下枪慌忙逃离现场。事后仇人因抢救及时活了下来。请问：被告人中途停止‘补枪’并逃跑的行为，在刑法犯罪形态上属于故意杀人罪的既遂、未遂，还是中止？",
+                "answerToken": "5pyq6YCC", // 未遂
+                "mechanics": ["shrink"]
             },
             {
-                id: 3,
-                hint: "逃跑的不是输入框，而是时间。提示：键盘上由「Q」开始往右数，第五个字母是什么？（在它逃跑前抓住它！）",
-                answerToken: "dA==",
-                init: function() {
-                    inputEl._origPos = {pos:inputEl.style.position, left:inputEl.style.left, top:inputEl.style.top}; inputEl.onmouseenter = () => { inputEl.style.position='fixed'; inputEl.style.left=Math.random()*(window.innerWidth-250)+'px'; inputEl.style.top=Math.random()*(window.innerHeight-50)+'px'; };
-                },
-                clear: function() {
-                    inputEl.onmouseenter = null; if(inputEl._origPos){ inputEl.style.position=inputEl._origPos.pos; inputEl.style.left=inputEl._origPos.left; inputEl.style.top=inputEl._origPos.top; delete inputEl._origPos; }
-                }
+                "id": 3,
+                "hint": "【第三庭：迟到的正当防卫】数名高利贷催收人员将被害人母子强行非法限制在公司接待室内，期间实施了极端的人身侮辱、辱骂和殴打。被害人多次报警，但民警到场调查后仅口头警告便离开。民警走后，催收人员再度被激怒，情绪更加疯狂，一步步将被害人逼至房间死角。极度绝望和惊恐的被害人顺手抓起桌上的一把水果刀乱划，导致其中一名催收人员失血过多身亡。公诉机关认为此时（提示：用鼠标全选本行文字查看隐形线索 ->）<span style='color:#fff; background:transparent;'>{催收人员并未持致命武器}</span>，因而指控被害人犯故意伤害罪。请你审理：被害人的行为属于正当防卫、故意伤害，还是防卫过当？",
+                "answerToken": "6Ziy5Y2r6L+H5b2T", // 防卫过当
+                "mechanics": ["shrink"]
             },
             {
-                id: 4,
-                hint: "这个谜题需要你保持绝对的小写：单词「happy」的反义词是「sad」。但由于大写锁定的存在，你该如何提交正确的全大写答案？      {第一题已告诉你答案}",
-                answerToken: "UFVCTElD",
-                init: function() {
-                    inputEl._upperHandler = function(){ this.value = this.value.toUpperCase(); }; inputEl.addEventListener('input', inputEl._upperHandler);
-                },
-                clear: function() {
-                    if(inputEl._upperHandler){ inputEl.removeEventListener('input', inputEl._upperHandler); delete inputEl._upperHandler; }
-                }
+                "id": 4,
+                "hint": "【第四庭：消失的毒药因果】被告人因家庭矛盾，在妻子的中药罐里投放了足以致死的高浓度剧毒砒霜。妻子在不知情的情况下喝下了毒药，5分钟后毒性尚未发作，妻子由于严重腹痛和心慌，决定出门前往医院。不料在过马路时，一辆由司机周某醉酒驾驶、严重超速的渣土车突然闯红灯冲出，将妻子当场撞死。法医尸检证实，妻子确实死于猛烈的车辆撞击导致颅脑损伤，而非砒霜中毒。公诉机关在起诉被告人时，你认为被告人的投毒行为应当认定为故意杀人罪的什么形态？（选填：既遂/未遂/中止）",
+                "answerToken": "5pyq6YCC", // 未遂
+                "mechanics": ["shrink"]
             },
             {
-                id: 5,
-                hint: "密码是一个经典的英文回文单词（正着读倒着读都一样）。它的意思是「雷达」。请注意：本关你的输入会被颠倒！",
-                answerToken: "cmFkYXI=",
-                init: function() {
-                    inputEl._backHandler = function(e){ if(e.inputType!=='deleteContentBackward'){ this.value = this.value.split('').reverse().join(''); } }; inputEl.addEventListener('input', inputEl._backHandler);
-                },
-                clear: function() {
-                    if(inputEl._backHandler){ inputEl.removeEventListener('input', inputEl._backHandler); delete inputEl._backHandler; }
-                }
+                "id": 5,
+                "hint": "【第五庭：真假绑架的终局】被告人因赌博欠下巨款，铤而走险将放学路上的某富豪7岁儿子强行抱上车并带到废弃工厂。随后，被告人给富豪拨打恐吓电话，索要现金300万元，并威胁不给就撕票。富豪在接到电话后极度恐慌，在驱车前往银行取款的途中因精神恍惚发生严重车祸不幸身亡。被告人在收音机里听到了富豪车祸身亡的新闻，由于害怕暴露，当晚便将孩子安全送回了学校门口。辩护律师认为被告人主动放人，属于犯罪中止。请你依法裁决，被告人的绑架罪在法理上其实已经达成了什么形态？",
+                "answerToken": "5pe66YCC", // 既遂
+                "mechanics": ["shrink"]
             },
             {
-                id: 6,
-                hint: "【数数题】输入框里住进了一只每0.2秒敲一下键盘的幽灵。请忽略那些随机数字，数一数本条提示信息中一共有几个英文问号？？？",
-                answerToken: "NA==",
-                init: function() {
-                    inputEl._ghostTimer = setInterval(()=>{ inputEl.value += Math.floor(Math.random()*10); }, 200);
-                },
-                clear: function() {
-                    if(inputEl._ghostTimer){ clearInterval(inputEl._ghostTimer); delete inputEl._ghostTimer; }
-                }
+                "id": 6,
+                "hint": "【第六庭：电梯里的劝阻者】被告人在小区电梯内遭遇一名老汉正在吸烟，因考虑到电梯是密闭公共空间且自己患有呼吸道疾病，被告人便出言对其进行劝阻。老汉情绪激动，不仅不听劝阻，反而大声辱骂被告人，双方在电梯内发生激烈言语争执（但自始至终绝无任何肢体冲突）。电梯门开后，老汉在走出大堂时因情绪过度激动，突发急性心肌梗死倒地身亡。家属随随即将劝阻者控告至法院，要求其承担巨额死亡赔偿金。作为民事法官，你认为被告人的合法劝阻行为与老汉的死亡之间是否具有法律上的因果关系？（选填：有/没有）",
+                "answerToken": "5rKh5pyJ", // 没有
+                "mechanics": ["shrink"]
             },
             {
-                id: 7,
-                hint: "【盲打测试】鼠标只要晃动，你打的字就会消失。在绝对的静止中，输入电脑键盘第一行正中间的那两个字母。",
-                answerToken: "dHk=",
-                init: function() {
-                    window._onMouseMoveRiddle = ()=>{ inputEl.value=''; }; window.addEventListener('mousemove', window._onMouseMoveRiddle);
-                },
-                clear: function() {
-                    if(window._onMouseMoveRiddle){ window.removeEventListener('mousemove', window._onMouseMoveRiddle); delete window._onMouseMoveRiddle; }
-                }
+                "id": 7,
+                "hint": "【第七庭：疯狂的顶包案】被告人张某在深夜醉酒驾驶私家车，在一处没有红绿灯的十字路口不慎将一名横过马路的行人撞飞，致其当场死亡。案发后张某极度害怕，立刻打电话给自己的亲弟弟。弟弟火速赶到现场，并主动向随后赶来的交警谎称自己才是当时的开车的司机，企图以此帮哥哥隐瞒罪行。然而交警通过调取沿途的高清天网监控，很快戳穿了这场双胞胎顶包的骗局。请问，弟弟这种主动帮亲属“顶包”、向警方作假证明掩盖罪行的独立行为，在刑法上构成什么罪？",
+                "answerToken": "5YyF5bqH572q", // 包庇罪
+                "mechanics": ["shrink"]
             },
             {
-                id: 8,
-                hint: "提示：不要去碰那个闪避的SUBMIT按钮！因为只要你碰它，输入框就会被清空。用别的键盘按键来提交答案吧。",
-                answerToken: "ZW50ZXI=",
-                init: function() {
-                    let rawText = hintEl.textContent; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (m,p1)=>`<span style="color:#fff;background:transparent">${p1}</span>`); hintEl.innerHTML = processedHtml;
-                    submitBtn.onmouseenter = ()=>{ inputEl.value=''; };
-                },
-                clear: function() {
-                    hintEl.innerHTML = hintEl.textContent.replace(/[{}]/g, '');
-                    submitBtn.onmouseenter = null;
-                }
+                "id": 8,
+                "hint": "【第八庭：恶魔的代理人】成年被告人陈某为了盗窃高档数码店，专门在网吧结识了刚满14周岁的小明。陈某利用小明对法律的无知，向其传授盗窃技巧，并承诺分赃。深夜，陈某在店外负责望风，教唆并指挥小明翻窗潜入店内，盗窃了价值近8万元的相机和镜头。根据我国刑法规定，14周岁的小明对盗窃罪不负刑事责任，因此无法对其定罪。但在法理上，作为幕后黑手且全面控制局面的陈某，其犯罪身份在刑法理论中被称为（选填：共同犯罪人 / 间接正犯 / 教唆犯）",
+                "answerToken": "6Ze05o6l5q2j5犯", // 间接正犯
+                "mechanics": ["shrink"]
             },
             {
-                id: 9,
-                hint: "在天翻地覆的旋转中保持冷静。谜底是：当整个世界旋转180度倒过来时，数字「69」看起来会变成什么？",
-                answerToken: "Njk=",
-                init: function() {
-                    document.body.style.transition='transform .5s'; document.body._rotState=0; document.body._rotTimer=setInterval(()=>{ document.body._rotState=document.body._rotState===0?180:0; document.body.style.transform=`rotate(${document.body._rotState}deg)`; },3000);
-                },
-                clear: function() {
-                    if(document.body._rotTimer){ clearInterval(document.body._rotTimer); delete document.body._rotTimer; } document.body.style.transform='rotate(0deg)';
-                }
+                "id": 9,
+                "hint": "【第九庭：致命的追击】黑社会成员刘某持刀在一路口疯狂殴打骑车人于某。在砍杀过程中，刘某由于用力过猛，手中的长刀不慎脱手甩飞到了地上。于某见状抢先一步冲上去捡起长刀，刘某见武器丢失急忙转身往轿车方向逃跑。于某由于处于极度极度惊恐和愤怒状态，持刀紧追其后，对着逃跑的刘某连砍数刀，导致刘某最终伤重身亡。公诉机关和舆论对“于某追砍逃跑中的刘某”是否构成故意伤害进行了激烈辩论。请法官依法作出终审判决，于某的行为属于什么？",
+                "answerToken": "5q2j5b2T6Ziy5Y2r", // 正当防卫
+                "mechanics": ["shrink"]
             },
             {
-                id: 10,
-                hint: "最后一关，取每个题目的答案的首字母加起来",
-                answerToken: "QXd0UHI0dGU2QQ==",
-                init: function() {
-                    let rawText = hintEl.textContent; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (m,p1)=>`<span style="color:#fff;background:transparent">${p1}</span>`); hintEl.innerHTML = processedHtml;
-                    inputEl._backHandler = function(e){ if(e.inputType!=='deleteContentBackward'){ this.value = this.value.split('').reverse().join(''); } }; inputEl.addEventListener('input', inputEl._backHandler);
-                    inputEl._shrinkW=250; inputEl._shrinkHandler=()=>{ inputEl._shrinkW=Math.max(50,inputEl._shrinkW-30); inputEl.style.width=inputEl._shrinkW+'px'; }; window.addEventListener('shrink-fail', inputEl._shrinkHandler);
-                },
-                clear: function() {
-                    hintEl.innerHTML = hintEl.textContent.replace(/[{}]/g, '');
-                    if(inputEl._backHandler){ inputEl.removeEventListener('input', inputEl._backHandler); delete inputEl._backHandler; }
-                    if(inputEl._shrinkHandler){ window.removeEventListener('shrink-fail', inputEl._shrinkHandler); delete inputEl._shrinkHandler; } inputEl.style.width='250px';
-                }
+                "id": 10,
+                "hint": "【第十庭：最高正义之辩】各位法官，恭喜你成功通过前九庭的严苛考验。最后一审，我们要探讨的是当年引发全社会大讨论的经典民事诉讼案——一位年轻人因扶起在公交站摔倒的老人，却被一审判决‘根据常理，不是你撞的你为什么去扶’而判令赔偿。这一判决曾一度让社会道德陷入寒冬。今天，在终审法院的门前，这个失控的提交按钮正在抗拒你的判决。请在框内输入我国法治和法官审判应当坚守的最核心价值和最高追求。（提示：全选本行有线索 -> <span style='color:#fff; background:transparent;'>{正义}</span>）",
+                "answerToken": "5q2j5LmJ", // 正义
+                "mechanics": ["shrink"]
             }
         ];
 
@@ -155,7 +121,7 @@
         const submitBtn = document.getElementById('submit-btn');
         const levelIndicator = document.getElementById('level-indicator');
 
-        // 反调试检测（仅当打开开发者工具并暂停时才会触发加载）
+        // 反调试检测
         setInterval(function() {
             const startTime = performance.now(); 
             debugger; 
@@ -176,37 +142,59 @@
             }
         };
 
+        // 统一处理机制初始化与清理
+        function runMechanics(action, currentLevel) {
+            if (!currentLevel.mechanics) return;
+            currentLevel.mechanics.forEach(mechId => {
+                const mech = mechanicsRegistry[mechId];
+                if (mech && typeof mech[action] === 'function') {
+                    mech[action](inputEl);
+                }
+            });
+        }
+
         function loadLevel(index) {
             if (index >= levels.length) {
-                hintEl.innerHTML = "恭喜，你用智慧击败了整个网页！";
+                hintEl.innerHTML = "🎯 <b>恭喜，你用智慧与正义击败了整个网页！法官大人，退庭！</b>";
                 inputEl.style.display = 'none'; 
                 submitBtn.style.display = 'none';
                 levelIndicator.innerText = "END"; 
                 return;
             }
-            // 清理上一关的机制效果
+            
+            // 1. 清理上一关的机制效果
             if (index > 0) {
-                try { levels[index - 1].clear(); } catch(e) { console.warn('清理出错:', e); }
+                try { runMechanics('clear', levels[index - 1]); } catch(e) { console.warn('清理出错:', e); }
             }
+
+            // 2. 加载新关卡
             const currentLevel = levels[index];
             levelIndicator.innerText = "STAGE: " + String(currentLevel.id).padStart(2, '0');
             hintEl.innerHTML = currentLevel.hint;
             inputEl.value = "";
-            // 初始化本关机制
-            try { currentLevel.init(); } catch(e) { console.warn('初始化出错:', e); }
+            
+            // 3. 初始化本关机制
+            try { runMechanics('init', currentLevel); } catch(e) { console.warn('初始化出错:', e); }
+        }
+
+        // 解决中文安全Base64解密
+        function decodeBase64(str) {
+            return decodeURIComponent(atob(str).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
         }
 
         function checkAnswer() {
             const currentLevel = levels[currentLevelIndex];
-            const userAnswer = inputEl.value;
-            const correctAnswer = atob(currentLevel.answerToken);
+            const userAnswer = inputEl.value.trim();
+            const correctAnswer = decodeBase64(currentLevel.answerToken);
             
             if (userAnswer === correctAnswer || userAnswer === "SKIP") {
-                alert("ACCESS GRANTED.");
+                alert("⚖️ 【判决有效】准许进入下一审。");
                 currentLevelIndex++;
                 loadLevel(currentLevelIndex);
             } else {
-                alert("WRONG ANSWER.");
+                alert("❌ 【证据不足/定罪错误】上诉驳回！");
                 // 触发 shrink 机制的失败事件
                 window.dispatchEvent(new Event('shrink-fail'));
             }
