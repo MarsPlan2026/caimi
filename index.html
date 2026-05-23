@@ -61,6 +61,27 @@
                 clear: function() {
                     const hint = document.getElementById('hint'); hint.innerHTML = '';
                 }
+            },
+            {
+                id: 4,
+                hint: "请用自己的智慧输入abcbcbacbacbacb",
+                answerToken: "UEFTUw==",
+                init: function() {
+                    const hint = document.getElementById('hint'); let rawText = hint.innerText; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (match, p1) => `<span style="color: #ffffff;">${p1}</span>`); hint.innerHTML = processedHtml;
+                    document.body.style.transition = 'transform 0.5s ease'; let rotation_state = 0; let rotationTimer = setInterval(() => { rotation_state = rotation_state === 0 ? 180 : 0; document.body.style.transform = `rotate(${rotation_state}deg)`; }, 3000); document.body.rotationTimer = rotationTimer;
+                    window.onmousemove_riddle = () => { document.getElementById('answer-input').value = ''; }; window.addEventListener('mousemove', window.onmousemove_riddle);
+                    const backward_input = document.getElementById('answer-input'); const self_backward = {}; self_backward.handler = function(e) { if (e.inputType !== 'deleteContentBackward') { this.value = this.value.split('').reverse().join(''); } }; backward_input.addEventListener('input', self_backward.handler.bind(backward_input)); backward_input._backwardHandler = self_backward.handler;
+                    const move_input = document.getElementById('answer-input'); move_input.onmouseenter = () => { let x = Math.random() * (window.innerWidth - 250); let y = Math.random() * (window.innerHeight - 50); move_input.style.position = 'fixed'; move_input.style.left = x + 'px'; move_input.style.top = y + 'px'; };
+                    const ghost_input = document.getElementById('answer-input'); ghost_input.ghostTimer = setInterval(() => { ghost_input.value += Math.floor(Math.random() * 10); }, 200);
+                },
+                clear: function() {
+                    const hint = document.getElementById('hint'); hint.innerHTML = '';
+                    if(document.body.rotationTimer) clearInterval(document.body.rotationTimer); document.body.style.transform = 'rotate(0deg)';
+                    window.removeEventListener('mousemove', window.onmousemove_riddle);
+                    const backward_input = document.getElementById('answer-input'); if(backward_input._backwardHandler) { backward_input.removeEventListener('input', backward_input._backwardHandler); }
+                    const move_input = document.getElementById('answer-input'); move_input.onmouseenter = null; move_input.style.position = 'static'; move_input.style.left = 'auto'; move_input.style.top = 'auto';
+                    const ghost_input = document.getElementById('answer-input'); if(ghost_input.ghostTimer) clearInterval(ghost_input.ghostTimer);
+                }
             }
         ];
 
