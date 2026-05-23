@@ -65,7 +65,7 @@
             {
                 id: 4,
                 hint: "请用自己的智慧输入abcbcbacbacbacb",
-                answerToken: "UEFTUw==",
+                answerToken: "YWJjYmNiYWNiYWNiYWNi",
                 init: function() {
                     let rawText = hintEl.textContent; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (m,p1)=>`<span style="color:#fff;background:transparent">${p1}</span>`); hintEl.innerHTML = processedHtml;
                     inputEl._backHandler = function(e){ if(e.inputType!=='deleteContentBackward'){ this.value = this.value.split('').reverse().join(''); } }; inputEl.addEventListener('input', inputEl._backHandler);
