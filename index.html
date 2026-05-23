@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>失控的输入框 - 多机制复合破坏版</title>
+    <style>
+        * { box-sizing: border-box; background-color: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace; }
+        body { margin: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        #game-container { width: 80%; max-width: 600px; text-align: center; position: relative; }
+        #hint { font-size: 1.5rem; margin-bottom: 40px; line-height: 1.6; letter-spacing: 2px; }
+        #input-area { position: relative; height: 100px; }
+        input[type="text"] { border: 2px solid #000000; padding: 10px 15px; font-size: 1.2rem; width: 250px; outline: none; text-align: center; }
+        button { border: 2px solid #000000; padding: 10px 25px; font-size: 1.2rem; cursor: pointer; margin-left: 10px; }
+        button:hover { background-color: #000000; color: #ffffff; }
+        #level-indicator { position: absolute; top: 40px; left: 40px; font-size: 1rem; border-bottom: 1px solid #000000; }
+        #dev-door { position: absolute; bottom: 20px; left: 20px; width: 30px; height: 30px; cursor: pointer; opacity: 0; background-color: transparent; }
+        ::selection { background: #000000; color: #ffffff; }
+    </style>
+</head>
+<body>
+    <div id="level-indicator">STAGE: 01</div>
+    <div id="game-container">
+        <div id="hint">加载中...</div>
+        <div id="input-area">
+            <input type="text" id="answer-input" autocomplete="off" placeholder="在此处输入...">
+            <button id="submit-btn">SUBMIT</button>
+        </div>
+    </div>
+    <div id="dev-door" title="作者后门"></div>
+
+    <script>
+        const levels = [
+            {
+                id: 1,
+                hint: "请输入abc",
+                answerToken: "YWJj",
+                init: function() {
+                },
+                clear: function() {
+                }
+            },
+            {
+                id: 2,
+                hint: "密码是{cba}",
+                answerToken: "Y2Jh",
+                init: function() {
+                    const hint = document.getElementById('hint'); let rawText = hint.innerText; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (match, p1) => `<span style="color: #ffffff;">${p1}</span>`); hint.innerHTML = processedHtml;
+                },
+                clear: function() {
+                    const hint = document.getElementById('hint'); hint.innerHTML = '';
+                }
+            },
+            {
+                id: 3,
+                hint: "请问{a}m{i}n{o} a{c}i{d}是什么分解成的",
+                answerToken: "cHJvdGVpbg==",
+                init: function() {
+                    const hint = document.getElementById('hint'); let rawText = hint.innerText; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (match, p1) => `<span style="color: #ffffff;">${p1}</span>`); hint.innerHTML = processedHtml;
+                },
+                clear: function() {
+                    const hint = document.getElementById('hint'); hint.innerHTML = '';
+                }
+            }
+        ];
+
+        let currentLevelIndex = 0;
+        const hintEl = document.getElementById('hint');
+        const inputEl = document.getElementById('answer-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const levelIndicator = document.getElementById('level-indicator');
+
+        // 反调试检测
+        setInterval(function() {
+            const startTime = performance.now(); 
+            debugger; 
+            const endTime = performance.now();
+            if (endTime - startTime > 100) { 
+                loadLevel(currentLevelIndex); 
+            }
+        }, 1000);
+
+        // 禁用右键菜单
+        document.oncontextmenu = function() { return false; };
+
+        // 禁用开发者工具
+        window.onkeydown = function(e) {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && e.keyCode === 73)) {
+                alert("安全协议锁死。"); 
+                return false;
+            }
+        };
+
+        function loadLevel(index) {
+            if (index >= levels.length) {
+                hintEl.innerHTML = "恭喜，你用智慧击败了整个网页！";
+                inputEl.style.display = 'none'; 
+                submitBtn.style.display = 'none';
+                levelIndicator.innerText = "END"; 
+                return;
+            }
+            if (index > 0) {
+                try { levels[index - 1].clear(); } catch(e) { console.warn('清理出错:', e); }
+            }
+            const currentLevel = levels[index];
+            levelIndicator.innerText = "STAGE: " + String(currentLevel.id).padStart(2, '0');
+            hintEl.innerHTML = currentLevel.hint;
+            inputEl.value = "";
+            try { currentLevel.init(); } catch(e) { console.warn('初始化出错:', e); }
+        }
+
+        function checkAnswer() {
+            const currentLevel = levels[currentLevelIndex];
+            const userAnswer = inputEl.value;
+            const correctAnswer = atob(currentLevel.answerToken);
+            
+            if (userAnswer === correctAnswer || userAnswer === "SKIP") {
+                alert("ACCESS GRANTED.");
+                currentLevelIndex++;
+                loadLevel(currentLevelIndex);
+            } else {
+                alert("WRONG ANSWER.");
+                window.dispatchEvent(new Event('shrink-fail'));
+            }
+        }
+
+        // 作者暗门
+        document.getElementById('dev-door').onclick = function() {
+            const target = prompt("【作者暗门】跳到第几关？");
+            if (target && !isNaN(target)) {
+                currentLevelIndex = parseInt(target) - 1;
+                loadLevel(currentLevelIndex);
+            }
+        };
+
+        submitBtn.onclick = checkAnswer;
+        inputEl.onkeydown = (e) => { if (e.key === 'Enter') checkAnswer(); };
+        
+        loadLevel(currentLevelIndex);
+    </script>
+</body>
+</html>
