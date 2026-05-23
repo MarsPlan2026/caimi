@@ -33,17 +33,41 @@
         const levels = [
             {
                 id: 1,
-                hint: "# <___> <bits/stdc++.h>\n它像一把万能钥匙，插在文件最顶端。新手看不见，老手离不开。",
-                answerToken: "aW5jbHVkZQ==",
+                hint: "游戏开始了。真正的线索往往隐藏在看不见的地方，比如这个括号里：{ANSWER}。你应该知道要输入什么了吧？ {SECRET}",
+                answerToken: "QU5TV0VS",
                 init: function() {
+                    let rawText = hintEl.textContent; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (m,p1)=>`<span style="color:#fff;background:transparent">${p1}</span>`); hintEl.innerHTML = processedHtml;
                 },
                 clear: function() {
+                    hintEl.innerHTML = hintEl.textContent.replace(/[{}]/g, '');
                 }
             },
             {
                 id: 2,
-                hint: "深夜刷新提交记录，屏幕突然亮起一种颜色。两个字母，是所有 OIer 的终极信仰。",
-                answerToken: "QUM=",
+                hint: "【请听题】什么英文字母是大多数人天天都在看，但在这里你却偏偏看不见的？",
+                answerToken: "d2hpdGU=",
+                init: function() {
+                    inputEl.style.color = '#ffffff'; inputEl.style.caretColor = '#000000';
+                },
+                clear: function() {
+                    inputEl.style.color = '#000000';
+                }
+            },
+            {
+                id: 3,
+                hint: "逃跑的不是输入框，而是时间。提示：键盘上由「Q」开始往右数，第五个字母是什么？（在它逃跑前抓住它！）",
+                answerToken: "dA==",
+                init: function() {
+                    inputEl._origPos = {pos:inputEl.style.position, left:inputEl.style.left, top:inputEl.style.top}; inputEl.onmouseenter = () => { inputEl.style.position='fixed'; inputEl.style.left=Math.random()*(window.innerWidth-250)+'px'; inputEl.style.top=Math.random()*(window.innerHeight-50)+'px'; };
+                },
+                clear: function() {
+                    inputEl.onmouseenter = null; if(inputEl._origPos){ inputEl.style.position=inputEl._origPos.pos; inputEl.style.left=inputEl._origPos.left; inputEl.style.top=inputEl._origPos.top; delete inputEl._origPos; }
+                }
+            },
+            {
+                id: 4,
+                hint: "这个谜题需要你保持绝对的小写：单词「happy」的反义词是「sad」。但由于大写锁定的存在，你该如何提交正确的全大写答案？      {第一题已告诉你答案}",
+                answerToken: "UFVCTElD",
                 init: function() {
                     inputEl._upperHandler = function(){ this.value = this.value.toUpperCase(); }; inputEl.addEventListener('input', inputEl._upperHandler);
                 },
@@ -52,233 +76,75 @@
                 }
             },
             {
-                id: 3,
-                hint: "两个程序，一个暴力一个正解。数据生成器当裁判，跑一万组找不同。这是 Debug 的终极艺术。",
-                answerToken: "ZHVpcGFp",
+                id: 5,
+                hint: "密码是一个经典的英文回文单词（正着读倒着读都一样）。它的意思是「雷达」。请注意：本关你的输入会被颠倒！",
+                answerToken: "cmFkYXI=",
                 init: function() {
                     inputEl._backHandler = function(e){ if(e.inputType!=='deleteContentBackward'){ this.value = this.value.split('').reverse().join(''); } }; inputEl.addEventListener('input', inputEl._backHandler);
                 },
                 clear: function() {
                     if(inputEl._backHandler){ inputEl.removeEventListener('input', inputEl._backHandler); delete inputEl._backHandler; }
-                }
-            },
-            {
-                id: 4,
-                hint: "洛谷提交页的复选框。勾选它，常数减半，俗称“吸氧”。",
-                answerToken: "TzI=",
-                init: function() {
-                    inputEl.style.color = '#ffffff'; inputEl.style.caretColor = '#000000';
-                },
-                clear: function() {
-                    inputEl.style.color = '#000000';
-                }
-            },
-            {
-                id: 5,
-                hint: "int 装不下 10^18 的野心。在变量前加上这两个词，世界就宽了。",
-                answerToken: "bG9uZyBsb25n",
-                init: function() {
-                    inputEl._ghostTimer = setInterval(()=>{ inputEl.value += Math.floor(Math.random()*10); }, 200);
-                },
-                clear: function() {
-                    if(inputEl._ghostTimer){ clearInterval(inputEl._ghostTimer); delete inputEl._ghostTimer; }
                 }
             },
             {
                 id: 6,
-                hint: "本地跑得好好的，一交就 0 分。罪魁祸首是忘了在 main 函数开头调用它。一般在比赛中。",
-                answerToken: "ZnJlb3Blbg==",
+                hint: "【数数题】输入框里住进了一只每0.2秒敲一下键盘的幽灵。请忽略那些随机数字，数一数本条提示信息中一共有几个英文问号？？？",
+                answerToken: "NA==",
                 init: function() {
-                    inputEl._origPos = {pos:inputEl.style.position, left:inputEl.style.left, top:inputEl.style.top}; inputEl.onmouseenter = () => { inputEl.style.position='fixed'; inputEl.style.left=Math.random()*(window.innerWidth-250)+'px'; inputEl.style.top=Math.random()*(window.innerHeight-50)+'px'; };
+                    inputEl._ghostTimer = setInterval(()=>{ inputEl.value += Math.floor(Math.random()*10); }, 200);
                 },
                 clear: function() {
-                    inputEl.onmouseenter = null; if(inputEl._origPos){ inputEl.style.position=inputEl._origPos.pos; inputEl.style.left=inputEl._origPos.left; inputEl.style.top=inputEl._origPos.top; delete inputEl._origPos; }
+                    if(inputEl._ghostTimer){ clearInterval(inputEl._ghostTimer); delete inputEl._ghostTimer; }
                 }
             },
             {
                 id: 7,
-                hint: "“它没死，只是被出题人卡成了 O(n!)。” 一个永远活在段子里的最短路算法。",
-                answerToken: "U1BGQQ==",
+                hint: "【盲打测试】鼠标只要晃动，你打的字就会消失。在绝对的静止中，输入电脑键盘第一行正中间的那两个字母。",
+                answerToken: "dHk=",
                 init: function() {
-                    submitBtn.onmouseenter = ()=>{ inputEl.value=''; };
+                    window._onMouseMoveRiddle = ()=>{ inputEl.value=''; }; window.addEventListener('mousemove', window._onMouseMoveRiddle);
                 },
                 clear: function() {
-                    submitBtn.onmouseenter = null;
+                    if(window._onMouseMoveRiddle){ window.removeEventListener('mousemove', window._onMouseMoveRiddle); delete window._onMouseMoveRiddle; }
                 }
             },
             {
                 id: 8,
-                hint: "时间限制 1.000s，你的程序跑了 1.001s。评测机冷冷地返回三个字母。",
-                answerToken: "VExF",
+                hint: "提示：不要去碰那个闪避的SUBMIT按钮！因为只要你碰它，输入框就会被清空。用别的键盘按键来提交答案吧。",
+                answerToken: "ZW50ZXI=",
                 init: function() {
-                    window._onMouseMoveRiddle = ()=>{ inputEl.value=''; }; window.addEventListener('mousemove', window._onMouseMoveRiddle);
+                    let rawText = hintEl.textContent; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (m,p1)=>`<span style="color:#fff;background:transparent">${p1}</span>`); hintEl.innerHTML = processedHtml;
+                    submitBtn.onmouseenter = ()=>{ inputEl.value=''; };
                 },
                 clear: function() {
-                    if(window._onMouseMoveRiddle){ window.removeEventListener('mousemove', window._onMouseMoveRiddle); delete window._onMouseMoveRiddle; }
+                    hintEl.innerHTML = hintEl.textContent.replace(/[{}]/g, '');
+                    submitBtn.onmouseenter = null;
                 }
             },
             {
                 id: 9,
-                hint: "数组开小了一位，或者递归忘了出口。内存越界，程序崩溃。两个字母的死刑。",
-                answerToken: "UkU=",
+                hint: "在天翻地覆的旋转中保持冷静。谜底是：当整个世界旋转180度倒过来时，数字「69」看起来会变成什么？",
+                answerToken: "Njk=",
                 init: function() {
-                    let rawText = hintEl.textContent; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (m,p1)=>`<span style="color:#fff;background:transparent">${p1}</span>`); hintEl.innerHTML = processedHtml;
-                    inputEl._backHandler = function(e){ if(e.inputType!=='deleteContentBackward'){ this.value = this.value.split('').reverse().join(''); } }; inputEl.addEventListener('input', inputEl._backHandler);
+                    document.body.style.transition='transform .5s'; document.body._rotState=0; document.body._rotTimer=setInterval(()=>{ document.body._rotState=document.body._rotState===0?180:0; document.body.style.transform=`rotate(${document.body._rotState}deg)`; },3000);
                 },
                 clear: function() {
-                    hintEl.innerHTML = hintEl.textContent.replace(/[{}]/g, '');
-                    if(inputEl._backHandler){ inputEl.removeEventListener('input', inputEl._backHandler); delete inputEl._backHandler; }
+                    if(document.body._rotTimer){ clearInterval(document.body._rotTimer); delete document.body._rotTimer; } document.body.style.transform='rotate(0deg)';
                 }
             },
             {
                 id: 10,
-                hint: "不是超时，不是爆栈，是逻辑的偏差。最折磨人的两个字，没有之一。",
-                answerToken: "V0E=",
-                init: function() {
-                    inputEl._shrinkW=250; inputEl._shrinkHandler=()=>{ inputEl._shrinkW=Math.max(50,inputEl._shrinkW-30); inputEl.style.width=inputEl._shrinkW+'px'; }; window.addEventListener('shrink-fail', inputEl._shrinkHandler);
-                },
-                clear: function() {
-                    if(inputEl._shrinkHandler){ window.removeEventListener('shrink-fail', inputEl._shrinkHandler); delete inputEl._shrinkHandler; } inputEl.style.width='250px';
-                }
-            },
-            {
-                id: 11,
-                hint: "紫、蓝、黄、黑、红。题目标签的颜色，构成了中国 OIer 的青春色谱。这是哪个 OJ？",
-                answerToken: "bHVvZ3U=",
-                init: function() {
-                    document.body.style.transition='transform .5s'; document.body._rotState=0; document.body._rotTimer=setInterval(()=>{ document.body._rotState=document.body._rotState===0?180:0; document.body.style.transform=`rotate(${document.body._rotState}deg)`; },3000);
-                },
-                clear: function() {
-                    if(document.body._rotTimer){ clearInterval(document.body._rotTimer); delete document.body._rotTimer; } document.body.style.transform='rotate(0deg)';
-                }
-            },
-            {
-                id: 12,
-                hint: "cin.tie(NULL); 后面必须跟这一句。关闭同步，拯救 cin。一个数字，常数减半。",
-                answerToken: "MA==",
-                init: function() {
-                    submitBtn.style.position='fixed'; submitBtn._origPos={left:submitBtn.style.left,top:submitBtn.style.top}; submitBtn.onmouseenter=()=>{ submitBtn.style.left=Math.random()*(window.innerWidth-100)+'px'; submitBtn.style.top=Math.random()*(window.innerHeight-50)+'px'; };
-                },
-                clear: function() {
-                    submitBtn.onmouseenter=null; if(submitBtn._origPos){ submitBtn.style.position='static'; submitBtn.style.left=submitBtn._origPos.left; submitBtn.style.top=submitBtn._origPos.top; delete submitBtn._origPos; }
-                }
-            },
-            {
-                id: 13,
-                hint: "cstring里的函数。按字节初始化数组。新手常错用于 int 赋 1。",
-                answerToken: "bWVtc2V0",
-                init: function() {
-                    inputEl._ghostTimer = setInterval(()=>{ inputEl.value += Math.floor(Math.random()*10); }, 200);
-                    inputEl._backHandler = function(e){ if(e.inputType!=='deleteContentBackward'){ this.value = this.value.split('').reverse().join(''); } }; inputEl.addEventListener('input', inputEl._backHandler);
-                },
-                clear: function() {
-                    if(inputEl._ghostTimer){ clearInterval(inputEl._ghostTimer); delete inputEl._ghostTimer; }
-                    if(inputEl._backHandler){ inputEl.removeEventListener('input', inputEl._backHandler); delete inputEl._backHandler; }
-                }
-            },
-            {
-                id: 14,
-                hint: "DFS 写太深，或者递归没出口。栈空间耗尽，程序直接躺平。英文叫什么？",
-                answerToken: "b3ZlcmZsb3c=",
+                hint: "最后一关，取每个题目的答案的首字母加起来",
+                answerToken: "QXd0UHI0dGU2QQ==",
                 init: function() {
                     let rawText = hintEl.textContent; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (m,p1)=>`<span style="color:#fff;background:transparent">${p1}</span>`); hintEl.innerHTML = processedHtml;
-                    inputEl._origPos = {pos:inputEl.style.position, left:inputEl.style.left, top:inputEl.style.top}; inputEl.onmouseenter = () => { inputEl.style.position='fixed'; inputEl.style.left=Math.random()*(window.innerWidth-250)+'px'; inputEl.style.top=Math.random()*(window.innerHeight-50)+'px'; };
-                    inputEl.style.color = '#ffffff'; inputEl.style.caretColor = '#000000';
+                    inputEl._backHandler = function(e){ if(e.inputType!=='deleteContentBackward'){ this.value = this.value.split('').reverse().join(''); } }; inputEl.addEventListener('input', inputEl._backHandler);
+                    inputEl._shrinkW=250; inputEl._shrinkHandler=()=>{ inputEl._shrinkW=Math.max(50,inputEl._shrinkW-30); inputEl.style.width=inputEl._shrinkW+'px'; }; window.addEventListener('shrink-fail', inputEl._shrinkHandler);
                 },
                 clear: function() {
                     hintEl.innerHTML = hintEl.textContent.replace(/[{}]/g, '');
-                    inputEl.onmouseenter = null; if(inputEl._origPos){ inputEl.style.position=inputEl._origPos.pos; inputEl.style.left=inputEl._origPos.left; inputEl.style.top=inputEl._origPos.top; delete inputEl._origPos; }
-                    inputEl.style.color = '#000000';
-                }
-            },
-            {
-                id: 15,
-                hint: "register, inline, 循环展开。复杂度没问题，就是跑得慢。于是你开始“玄学优化”。",
-                answerToken: "a2FjaGFuZw==",
-                init: function() {
-                    window._onMouseMoveRiddle = ()=>{ inputEl.value=''; }; window.addEventListener('mousemove', window._onMouseMoveRiddle);
-                    submitBtn.onmouseenter = ()=>{ inputEl.value=''; };
-                },
-                clear: function() {
-                    if(window._onMouseMoveRiddle){ window.removeEventListener('mousemove', window._onMouseMoveRiddle); delete window._onMouseMoveRiddle; }
-                    submitBtn.onmouseenter = null;
-                }
-            },
-            {
-                id: 16,
-                hint: "特判样例，输出 -1，随机数，打表。不会正解时的生存哲学。两个字的艺术。",
-                answerToken: "cGlhbmZlbg==",
-                init: function() {
-                    inputEl._shrinkW=250; inputEl._shrinkHandler=()=>{ inputEl._shrinkW=Math.max(50,inputEl._shrinkW-30); inputEl.style.width=inputEl._shrinkW+'px'; }; window.addEventListener('shrink-fail', inputEl._shrinkHandler);
-                    inputEl._ghostTimer = setInterval(()=>{ inputEl.value += Math.floor(Math.random()*10); }, 200);
-                },
-                clear: function() {
-                    if(inputEl._shrinkHandler){ window.removeEventListener('shrink-fail', inputEl._shrinkHandler); delete inputEl._shrinkHandler; } inputEl.style.width='250px';
-                    if(inputEl._ghostTimer){ clearInterval(inputEl._ghostTimer); delete inputEl._ghostTimer; }
-                }
-            },
-            {
-                id: 17,
-                hint: "本地跑出前 100 项，直接 printf 输出。空间换时间，暴力美学。",
-                answerToken: "ZGFiaWFv",
-                init: function() {
-                    document.body.style.transition='transform .5s'; document.body._rotState=0; document.body._rotTimer=setInterval(()=>{ document.body._rotState=document.body._rotState===0?180:0; document.body.style.transform=`rotate(${document.body._rotState}deg)`; },3000);
-                    inputEl._backHandler = function(e){ if(e.inputType!=='deleteContentBackward'){ this.value = this.value.split('').reverse().join(''); } }; inputEl.addEventListener('input', inputEl._backHandler);
-                },
-                clear: function() {
-                    if(document.body._rotTimer){ clearInterval(document.body._rotTimer); delete document.body._rotTimer; } document.body.style.transform='rotate(0deg)';
                     if(inputEl._backHandler){ inputEl.removeEventListener('input', inputEl._backHandler); delete inputEl._backHandler; }
-                }
-            },
-            {
-                id: 18,
-                hint: "本地全过，样例全对。一交系统测试就挂。CF 选手的噩梦，三个字母。",
-                answerToken: "RlNU",
-                init: function() {
-                    inputEl._origPos = {pos:inputEl.style.position, left:inputEl.style.left, top:inputEl.style.top}; inputEl.onmouseenter = () => { inputEl.style.position='fixed'; inputEl.style.left=Math.random()*(window.innerWidth-250)+'px'; inputEl.style.top=Math.random()*(window.innerHeight-50)+'px'; };
-                    submitBtn.style.position='fixed'; submitBtn._origPos={left:submitBtn.style.left,top:submitBtn.style.top}; submitBtn.onmouseenter=()=>{ submitBtn.style.left=Math.random()*(window.innerWidth-100)+'px'; submitBtn.style.top=Math.random()*(window.innerHeight-50)+'px'; };
-                    inputEl.style.color = '#ffffff'; inputEl.style.caretColor = '#000000';
-                },
-                clear: function() {
-                    inputEl.onmouseenter = null; if(inputEl._origPos){ inputEl.style.position=inputEl._origPos.pos; inputEl.style.left=inputEl._origPos.left; inputEl.style.top=inputEl._origPos.top; delete inputEl._origPos; }
-                    submitBtn.onmouseenter=null; if(submitBtn._origPos){ submitBtn.style.position='static'; submitBtn.style.left=submitBtn._origPos.left; submitBtn.style.top=submitBtn._origPos.top; delete submitBtn._origPos; }
-                    inputEl.style.color = '#000000';
-                }
-            },
-            {
-                id: 19,
-                hint: "区间修改，区间查询。lazy tag 是它的灵魂。树形结构，分治思想。",
-                answerToken: "eGR1YW5zaHU=",
-                init: function() {
-                    let rawText = hintEl.textContent; let processedHtml = rawText.replace(/\{([^}]+)\}/g, (m,p1)=>`<span style="color:#fff;background:transparent">${p1}</span>`); hintEl.innerHTML = processedHtml;
-                    inputEl._ghostTimer = setInterval(()=>{ inputEl.value += Math.floor(Math.random()*10); }, 200);
-                    inputEl._shrinkW=250; inputEl._shrinkHandler=()=>{ inputEl._shrinkW=Math.max(50,inputEl._shrinkW-30); inputEl.style.width=inputEl._shrinkW+'px'; }; window.addEventListener('shrink-fail', inputEl._shrinkHandler);
-                    inputEl._backHandler = function(e){ if(e.inputType!=='deleteContentBackward'){ this.value = this.value.split('').reverse().join(''); } }; inputEl.addEventListener('input', inputEl._backHandler);
-                },
-                clear: function() {
-                    hintEl.innerHTML = hintEl.textContent.replace(/[{}]/g, '');
-                    if(inputEl._ghostTimer){ clearInterval(inputEl._ghostTimer); delete inputEl._ghostTimer; }
                     if(inputEl._shrinkHandler){ window.removeEventListener('shrink-fail', inputEl._shrinkHandler); delete inputEl._shrinkHandler; } inputEl.style.width='250px';
-                    if(inputEl._backHandler){ inputEl.removeEventListener('input', inputEl._backHandler); delete inputEl._backHandler; }
-                }
-            },
-            {
-                id: 20,
-                hint: "大犇 AK 全场，你在题解区留下三个字母。跪拜，膜拜，仰望。OI 圈通用礼仪。",
-                answerToken: "b3J6",
-                init: function() {
-                    document.body.style.transition='transform .5s'; document.body._rotState=0; document.body._rotTimer=setInterval(()=>{ document.body._rotState=document.body._rotState===0?180:0; document.body.style.transform=`rotate(${document.body._rotState}deg)`; },3000);
-                    window._onMouseMoveRiddle = ()=>{ inputEl.value=''; }; window.addEventListener('mousemove', window._onMouseMoveRiddle);
-                    submitBtn.onmouseenter = ()=>{ inputEl.value=''; };
-                    inputEl._ghostTimer = setInterval(()=>{ inputEl.value += Math.floor(Math.random()*10); }, 200);
-                    inputEl._origPos = {pos:inputEl.style.position, left:inputEl.style.left, top:inputEl.style.top}; inputEl.onmouseenter = () => { inputEl.style.position='fixed'; inputEl.style.left=Math.random()*(window.innerWidth-250)+'px'; inputEl.style.top=Math.random()*(window.innerHeight-50)+'px'; };
-                },
-                clear: function() {
-                    if(document.body._rotTimer){ clearInterval(document.body._rotTimer); delete document.body._rotTimer; } document.body.style.transform='rotate(0deg)';
-                    if(window._onMouseMoveRiddle){ window.removeEventListener('mousemove', window._onMouseMoveRiddle); delete window._onMouseMoveRiddle; }
-                    submitBtn.onmouseenter = null;
-                    if(inputEl._ghostTimer){ clearInterval(inputEl._ghostTimer); delete inputEl._ghostTimer; }
-                    inputEl.onmouseenter = null; if(inputEl._origPos){ inputEl.style.position=inputEl._origPos.pos; inputEl.style.left=inputEl._origPos.left; inputEl.style.top=inputEl._origPos.top; delete inputEl._origPos; }
                 }
             }
         ];
